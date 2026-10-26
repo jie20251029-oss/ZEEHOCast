@@ -1,0 +1,48 @@
+name: ZEEHOCast
+options:
+  bundleIdPrefix: com.zeeho
+  deploymentTarget:
+    iOS: "14.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    IPHONEOS_DEPLOYMENT_TARGET: "14.0"
+targets:
+  ZEEHOCast:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Sources
+    info:
+      path: App/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zeeho.cast
+        INFOPLIST_FILE: App/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_BITCODE: NO
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGN_IDENTITY: ""
+        PROVISIONING_PROFILE_SPECIFIER: ""
+    dependencies:
+      - target: ZEEHOCastBroadcast
+        embed: true
+  ZEEHOCastBroadcast:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BroadcastExtension
+    info:
+      path: BroadcastExtension/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zeeho.cast.broadcast
+        INFOPLIST_FILE: BroadcastExtension/Info.plist
+        ENABLE_BITCODE: NO
+        SKIP_INSTALL: YES
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGN_IDENTITY: ""
+        PROVISIONING_PROFILE_SPECIFIER: ""
