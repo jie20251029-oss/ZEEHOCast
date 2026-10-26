@@ -125,9 +125,11 @@ struct CastView: View {
 
     private func presentBroadcastPicker() {
         if let window = UIApplication.shared.windows.first {
-            let picker = RPBroadcastPickerView()
-            picker.preferredExtensionIdentifier = "com.zeeho.cast.broadcast"
-            picker.frame = CGRect(x: window.bounds.midX - 50, y: window.bounds.midY - 50, width: 100, height: 100)
+            let picker = RPSystemBroadcastPickerView(
+                frame: CGRect(x: window.bounds.midX - 50, y: window.bounds.midY - 50, width: 100, height: 100)
+            )
+            picker.preferredExtension = "com.zeeho.cast.broadcast"
+            picker.showsMicrophoneButton = false
             window.addSubview(picker)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 picker.removeFromSuperview()

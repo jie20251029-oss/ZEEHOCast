@@ -19,7 +19,6 @@ final class ECConnection {
         let h = NWEndpoint.Host(host)
         let p = NWEndpoint.Port(rawValue: UInt16(port))!
         conn = NWConnection(host: h, port: p, using: .tcp)
-        conn?.parameters.expeditedDelivery = true
         conn?.parameters.allowLocalEndpointReuse = true
     }
 

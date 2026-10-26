@@ -54,7 +54,7 @@ struct ContentView: View {
         .sheet(isPresented: $showQR) {
             QRScannerView { result in
                 showQR = false
-                if let t = ECProtocol.parseTarget(result) {
+                if let t = ECFrame.parseTarget(result) {
                     manualIP = t.host
                     manualPort = String(t.port)
                     tab = 2
