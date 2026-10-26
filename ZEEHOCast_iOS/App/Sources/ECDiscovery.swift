@@ -32,7 +32,7 @@ final class ECDiscovery: NSObject {
             for r in results {
                 switch r.endpoint {
                 case .hostPort(let host, let port):
-                    self.emit(name: r.name, host: "\(host)", port: Int(port.rawValue))
+                    self.emit(name: "\(host)", host: "\(host)", port: Int(port.rawValue))
                 case .service(let name, let type, let domain, _):
                     // Bonjour 结果只有服务名，需要再解析才知道 IP
                     self.resolve(name: name, type: type, domain: domain)
