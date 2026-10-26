@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 高级暗色：碳黑底 + 极核橙 -->
+    <color name="bg_dark">#0B0F14</color>
+    <color name="bg_card">#141B24</color>
+    <color name="bg_card_2">#1A2330</color>
+    <color name="accent">#FF6A00</color>
+    <color name="accent_dim">#CC5500</color>
+    <color name="text_primary">#F2F5F7</color>
+    <color name="text_secondary">#8A94A3</color>
+    <color name="text_tertiary">#566070</color>
+    <color name="divider">#202A36</color>
+    <color name="success">#2BD48A</color>
+    <color name="danger">#FF4D4F</color>
+    <color name="transparent">#00000000</color>
+</resources>
