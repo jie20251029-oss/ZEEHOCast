@@ -1,0 +1,48 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ZEEHOCast_iOS/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        working-directory: ZEEHOCast_iOS
+        run: xcodegen generate
+
+      - name: Build App
+        working-directory: ZEEHOCast_iOS
+        run: |
+          xcodebuild -project ZEEHOCast.xcodeproj \
+            -scheme ZEEHOCast \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package IPA
+        working-directory: ZEEHOCast_iOS
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/ZEEHOCast.app Payload/
+          zip -r ZEEHOCast.ipa Payload
+          rm -rf Payload
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZEEHOCast.ipa
+          path: ZEEHOCast_iOS/ZEEHOCast.ipa
