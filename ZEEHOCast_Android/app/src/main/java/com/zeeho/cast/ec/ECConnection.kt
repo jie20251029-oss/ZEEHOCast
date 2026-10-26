@@ -75,7 +75,7 @@ class ECConnection(
             try {
                 while (true) {
                     val magic = inp.readNBytes(ECFrame.HEADER_SIZE)
-                    if (magic.isEmpty) { ECLog.i("conn", "对端关闭"); break }
+                    if (magic.isEmpty()) { ECLog.i("conn", "对端关闭"); break }
                     // 校验 magic
                     if (magic.size < ECFrame.HEADER_SIZE) { ECLog.i("conn", "短帧"); break }
                     val ok = ECFrame.MAGIC.contentEquals(magic.copyOf(4))

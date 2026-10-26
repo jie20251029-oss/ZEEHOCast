@@ -1,10 +1,7 @@
 name: Build iOS IPA
 
+# 手动触发即可；push 触发的完整双端构建见仓库根目录 .github/workflows/build.yml
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'ZEEHOCast_iOS/**'
   workflow_dispatch:
 
 jobs:
@@ -27,7 +24,10 @@ jobs:
             -scheme ZEEHOCast \
             -configuration Release \
             -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
             -derivedDataPath build \
+            ONLY_ACTIVE_ARCH=NO \
+            ARCHS=arm64 \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -44,5 +44,6 @@ jobs:
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ZEEHOCast.ipa
+          name: ZEEHOCast-IPA
+          if-no-files-found: error
           path: ZEEHOCast_iOS/ZEEHOCast.ipa

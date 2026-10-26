@@ -17,6 +17,7 @@ import android.os.IBinder
 import com.zeeho.cast.ec.ECConnection
 import com.zeeho.cast.ec.ECConstants
 import com.zeeho.cast.ec.ECLog
+import com.zeeho.cast.ui.CastActivity
 import kotlinx.coroutines.*
 
 /**
@@ -179,7 +180,7 @@ class CastService : Service() {
     private fun buildNotification(text: String): Notification {
         val pi = android.app.PendingIntent.getActivity(
             this, 0,
-            Intent(this, ui.CastActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            Intent(this, CastActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
             android.app.PendingIntent.FLAG_IMMUTABLE
         )
         return Notification.Builder(this, CHANNEL_ID)

@@ -122,7 +122,7 @@ object ECLog {
     fun hex(tag: String, bytes: ByteArray, max: Int = 512) {
         val show = bytes.copyOf(minOf(bytes.size, max))
         val sb = StringBuilder(show.size * 3)
-        for (b in show) sb.append("%02X ".format(b and 0xFF))
+        for (b in show) sb.append("%02X ".format(b.toInt() and 0xFF))
         if (bytes.size > max) sb.append("…(+${bytes.size - max}B)")
         i(tag, "HEX[${bytes.size}B] $sb")
     }

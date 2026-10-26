@@ -1,10 +1,7 @@
 name: Build Android APK
 
+# 手动触发即可；push 触发的完整双端构建见仓库根目录 .github/workflows/build.yml
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'ZEEHOCast_Android/**'
   workflow_dispatch:
 
 jobs:
@@ -23,18 +20,21 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build debug APK
-        run: gradle assembleDebug --no-daemon
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build release APK
-        run: gradle assembleRelease --no-daemon
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ZEEHOCast-APK
+          if-no-files-found: error
           path: |
             ZEEHOCast_Android/app/build/outputs/apk/debug/*.apk
             ZEEHOCast_Android/app/build/outputs/apk/release/*.apk
