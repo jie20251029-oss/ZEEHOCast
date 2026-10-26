@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">极核投屏</string>
+    <string name="tab_discover">自动发现</string>
+    <string name="tab_qr">扫码连接</string>
+    <string name="tab_manual">手动连接</string>
+    <string name="hint_searching">正在扫描仪表 WiFi 网络…</string>
+    <string name="btn_refresh">重新扫描</string>
+    <string name="label_ip">仪表 IP 地址</string>
+    <string name="hint_ip">192.168.49.1</string>
+    <string name="label_port">端口</string>
+    <string name="hint_port">1807</string>
+    <string name="btn_connect">连接投屏</string>
+    <string name="empty_devices">未发现仪表设备\n请确认手机已连接仪表 WiFi</string>
+    <string name="cast_status_connecting">正在建立投屏通道…</string>
+    <string name="cast_status_live">投屏中</string>
+    <string name="cast_status_error">连接失败：%1$s</string>
+    <string name="btn_stop">断开投屏</string>
+    <string name="cast_hint">屏幕内容将通过仪表 WiFi 实时投送到仪表显示屏\n锁定屏幕后投屏继续（熄屏投屏）</string>
+    <string name="disclaimer">本工具为个人维护用途，仅适用于极核 AE5i 仪表调试，请勿用于非法用途。</string>
+    <string name="settings_log">导出日志</string>
+    <string name="log_exported">日志已导出到：%1$s</string>
+</resources>
