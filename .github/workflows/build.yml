@@ -44,7 +44,7 @@ jobs:
             ZEEHOCast_Android/app/build/outputs/apk/release/*.apk
 
   ios:
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
