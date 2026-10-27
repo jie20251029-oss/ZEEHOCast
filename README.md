@@ -58,8 +58,34 @@ iOS:  ReplayKit 扩展 ──CMSampleBuffer──▶ localhost:53001 ─┘     
 1. 手机连上仪表的 WiFi AP（投屏网段默认 `192.168.49.1`）。
 2. 从 [Releases](https://github.com/jie20251029-oss/ZEEHOCast/releases) 下载：
    - **Android**：`ZEEHOCast-*-debug.apk` 可直接安装。
-   - **iOS**：`ZEEHOCast-*-unsigned.ipa` 是**未签名**包，需用 TrollStore / AltStore / 自签工具签名后安装。
+   - **iOS**：见下方[安装与自签](#ios-安装与自签)。
 3. 打开 App → 自动发现 / 扫仪表二维码 / 手动填 IP → 开始投屏。
+
+## iOS 安装与自签
+
+iOS 产物有两个版本，**按你的设备选一个**：
+
+| 文件 | 适用 | 说明 |
+|---|---|---|
+| `ZEEHOCast-1.0.0-unsigned.ipa` | 爱思助手 / Sideloadly / AltStore 等自签工具 | 工具会用你的 Apple ID 重新签名，免费账号 7 天需续签 |
+| `ZEEHOCast-1.0.0-adhoc.ipa` | TrollStore、越狱设备 | 已做 ad-hoc 签名（`codesign -s -`），TrollStore 可直接装 |
+
+自签时**两个 Bundle ID 都要签**（工具会自动处理，若报错请检查）：
+
+- 主 App：`com.zeeho.cast`
+- 广播扩展：`com.zeeho.cast.broadcast`
+
+**自签后打不开 / 装不上的常见原因**（本项目已修，供排查参考）：
+
+1. **扩展 Info.plist 缺 `NSExtension`** —— 这是最常见的坑。ReplayKit 广播扩展必须有
+   `NSExtensionPointIdentifier = com.apple.broadcast-services-upload`，否则系统广播选择器里
+   看不到它，重签安装时也会被判为「无效扩展」直接失败。
+   本项目早期版本因为 `xcodegen` 只用 `info.path` 生成模板 plist、覆盖了手写文件而丢了这个键，
+   现在所有 plist 键都写在 [project.yml](ZEEHOCast_iOS/project.yml) 的 `info.properties` 里。
+2. **缺 `NSLocalNetworkUsageDescription` / `NSBonjourServices`** —— iOS 14+ 访问局域网需要授权，
+   否则 mDNS 自动发现永远为空（不报错，只是搜不到设备）。
+3. **缺 `UIBackgroundModes: audio`** —— 熄屏后进程会被系统挂起，投屏中断。
+4. 免费 Apple ID 签名后**只能维持 7 天**，到期需重新签名；TrollStore 安装则不受此限制（取决于系统版本）。
 
 ## 构建
 
@@ -74,13 +100,24 @@ cd ZEEHOCast_Android
 
 ```bash
 cd ZEEHOCast_iOS
-brew install xcodegen && xcodegen generate
+brew install xcodegen && xcodegen generate     # Info.plist 与 .xcodeproj 都由它生成
 xcodebuild -project ZEEHOCast.xcodeproj -scheme ZEEHOCast \
   -configuration Release -sdk iphoneos -derivedDataPath build \
   CODE_SIGNING_ALLOWED=NO build
+
+# 未签名 IPA
 mkdir -p Payload && cp -R build/Build/Products/Release-iphoneos/ZEEHOCast.app Payload/ \
-  && zip -r ZEEHOCast.ipa Payload
+  && zip -r ZEEHOCast-unsigned.ipa Payload && rm -rf Payload
+
+# ad-hoc 签名 IPA（先签扩展再签主 App）
+APP=build/Build/Products/Release-iphoneos/ZEEHOCast.app
+codesign --force --sign - --timestamp=none "$APP/PlugIns/ZEEHOCastBroadcast.appex"
+codesign --force --sign - --timestamp=none "$APP"
+mkdir -p Payload && cp -R "$APP" Payload/ && zip -r ZEEHOCast-adhoc.ipa Payload && rm -rf Payload
 ```
+
+> **改 Info.plist 请改 `project.yml`**，不要直接改 `App/Info.plist` / `BroadcastExtension/Info.plist`
+> —— 那两个文件由 `xcodegen generate` 生成并覆盖。
 
 **CI**：推到 `main` 后根 workflow 自动双端构建，产物在 Actions 的 Artifacts；打 tag 后可在 Releases 发布。
 
@@ -91,7 +128,7 @@ mkdir -p Payload && cp -R build/Build/Products/Release-iphoneos/ZEEHOCast.app Pa
 
 - **协议字段是逆向推断的**：帧头字节级布局（magic / 命令 ID / 长度域）依据 `cfmoto-client-ios 3.0.5` 与 `libECSDK.so` 的观察得出，属于合理模板而非官方文档。若实车不通，请用 App 内「导出日志」抓 HEX，对照微调 `ECProtocol.kt` / `ECProtocol.swift` 里的常量。
 - **仪表固件差异**：不同年份/批次固件的命令 ID、mDNS 服务名可能不同。
-- **产物未签名**：CI 用 `CODE_SIGNING_ALLOWED=NO` 出包，iOS 必须自签；Android release 包为 unsigned。
+- **产物未签名**：CI 用 `CODE_SIGNING_ALLOWED=NO` 出包；iOS 需自签或用 TrollStore，Android release 包为 unsigned。
 - **仅在仪表 WiFi AP 环境下可用**，不经过云端，也不支持远程投屏。
 
 ## 免责声明

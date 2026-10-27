@@ -71,17 +71,51 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Package IPA
+      - name: Verify Info.plist keys (NSExtension / 本地网络 / 后台模式)
+        working-directory: ZEEHOCast_iOS
+        run: |
+          APP=build/Build/Products/Release-iphoneos/ZEEHOCast.app
+          EXTA=$APP/PlugIns/ZEEHOCastBroadcast.appex
+          echo "--- app 权限声明 ---"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :NSLocalNetworkUsageDescription" "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :UIBackgroundModes:0" "$APP/Info.plist"
+          echo "--- 扩展 NSExtension ---"
+          /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPointIdentifier" "$EXTA/Info.plist"
+          /usr/libexec/PlistBuddy -c "Print :NSExtension:NSExtensionPrincipalClass" "$EXTA/Info.plist"
+          test -f "$APP/Assets.car" && echo "Assets.car OK"
+
+      - name: Package IPA (unsigned)
         working-directory: ZEEHOCast_iOS
         run: |
           mkdir -p Payload
           cp -R build/Build/Products/Release-iphoneos/ZEEHOCast.app Payload/
-          zip -r ZEEHOCast.ipa Payload
+          zip -qry ZEEHOCast-unsigned.ipa Payload
           rm -rf Payload
+
+      - name: Ad-hoc sign (TrollStore / 越狱设备用)
+        working-directory: ZEEHOCast_iOS
+        run: |
+          APP=build/Build/Products/Release-iphoneos/ZEEHOCast.app
+          EXTA=$APP/PlugIns/ZEEHOCastBroadcast.appex
+          # 先签扩展，再签主 App（顺序不能反）
+          /usr/bin/codesign --force --sign - --timestamp=none "$EXTA"
+          /usr/bin/codesign --force --sign - --timestamp=none "$APP"
+          /usr/bin/codesign -dv --verbose=4 "$APP" 2>&1 | head -20
+          /usr/bin/codesign --verify --deep --verbose=2 "$APP"
+
+      - name: Package IPA (ad-hoc signed)
+        working-directory: ZEEHOCast_iOS
+        run: |
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/ZEEHOCast.app Payload/
+          zip -qry ZEEHOCast-adhoc.ipa Payload
+          rm -rf Payload
+          ls -la *.ipa
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: ZEEHOCast-IPA
           if-no-files-found: error
-          path: ZEEHOCast_iOS/ZEEHOCast.ipa
+          path: ZEEHOCast_iOS/*.ipa

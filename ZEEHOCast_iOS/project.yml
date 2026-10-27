@@ -1,3 +1,11 @@
+# XcodeGen 工程定义 —— 唯一事实来源
+#
+# 重要：targets.*.info.properties 的内容会被 `xcodegen generate` **写入并覆盖**
+# 对应路径的 Info.plist。所以不要手改 App/Info.plist 或 BroadcastExtension/Info.plist，
+# 改这里再重新 generate。
+# （曾踩坑：只写了 info.path 没写 properties，xcodegen 用最小模板覆盖了手写 plist，
+#   导致 NSExtension / NSLocalNetworkUsageDescription / UIBackgroundModes 全部丢失，
+#   广播扩展变成无效扩展，重签后也无法正常使用。）
 name: ZEEHOCast
 options:
   bundleIdPrefix: com.zeeho
@@ -6,26 +14,51 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    TARGETED_DEVICE_FAMILY: "1"
     IPHONEOS_DEPLOYMENT_TARGET: "14.0"
+    ENABLE_BITCODE: NO
+    CODE_SIGN_REQUIRED: NO
+    CODE_SIGNING_REQUIRED: NO
+    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGN_IDENTITY: ""
+    PROVISIONING_PROFILE_SPECIFIER: ""
 targets:
   ZEEHOCast:
     type: application
     platform: iOS
     sources:
       - path: App/Sources
+      - path: App/Assets.xcassets
+        buildPhase: resources
     info:
       path: App/Info.plist
+      properties:
+        CFBundleDevelopmentRegion: zh_CN
+        CFBundleDisplayName: 极核投屏
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        NSCameraUsageDescription: 用于扫描仪表连接二维码
+        NSLocalNetworkUsageDescription: 用于发现并连接极核仪表 WiFi 进行投屏
+        NSBonjourServices:
+          - _EasyConn._tcp
+        # 熄屏投屏靠后台常驻，缺这个键熄屏后会被系统挂起
+        UIBackgroundModes:
+          - audio
+        UILaunchScreen: {}
+        UIRequiredDeviceCapabilities:
+          - arm64
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        # 协议日志导出到 Documents，方便用「文件」App 取出
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zeeho.cast
-        INFOPLIST_FILE: App/Info.plist
+        TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        ENABLE_BITCODE: NO
-        CODE_SIGNING_REQUIRED: NO
-        CODE_SIGNING_ALLOWED: NO
-        CODE_SIGN_IDENTITY: ""
-        PROVISIONING_PROFILE_SPECIFIER: ""
     dependencies:
       - target: ZEEHOCastBroadcast
         embed: true
@@ -34,15 +67,24 @@ targets:
     platform: iOS
     sources:
       - path: BroadcastExtension
+        excludes:
+          - Info.plist
     info:
       path: BroadcastExtension/Info.plist
+      properties:
+        CFBundleDevelopmentRegion: zh_CN
+        CFBundleDisplayName: 极核投屏广播
+        CFBundlePackageType: "XPC!"
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "1"
+        # ReplayKit 广播扩展必须声明 NSExtension，否则系统广播选择器里看不到，
+        # 重签安装也会被判为无效扩展。
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.broadcast-services-upload
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SampleHandler
+          RPBroadcastProcessMode: RPBroadcastProcessModeSampleBuffer
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zeeho.cast.broadcast
-        INFOPLIST_FILE: BroadcastExtension/Info.plist
-        ENABLE_BITCODE: NO
+        TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES
-        CODE_SIGNING_REQUIRED: NO
-        CODE_SIGNING_ALLOWED: NO
-        CODE_SIGN_IDENTITY: ""
-        PROVISIONING_PROFILE_SPECIFIER: ""
