@@ -1,7 +1,11 @@
-# XcodeGen 宸ョ▼瀹氫箟 鈥斺€?鍞竴浜嬪疄鏉ユ簮
+# XcodeGen 工程定义 —— 唯一事实来源
 #
-# 閲嶈锛歵argets.*.info.properties 鐨勫唴瀹逛細琚?`xcodegen generate` **鍐欏叆骞惰鐩?*
-# 瀵瑰簲璺緞鐨?Info.plist銆傛墍浠ヤ笉瑕佹墜鏀?App/Info.plist 鎴?BroadcastExtension/Info.plist锛?# 鏀硅繖閲屽啀閲嶆柊 generate銆?# 锛堟浘韪╁潙锛氬彧鍐欎簡 info.path 娌″啓 properties锛寈codegen 鐢ㄦ渶灏忔ā鏉胯鐩栦簡鎵嬪啓 plist锛?#   瀵艰嚧 NSExtension / NSLocalNetworkUsageDescription / UIBackgroundModes 鍏ㄩ儴涓㈠け锛?#   骞挎挱鎵╁睍鍙樻垚鏃犳晥鎵╁睍锛岄噸绛惧悗涔熸棤娉曟甯镐娇鐢ㄣ€傦級
+# 重要：targets.*.info.properties 的内容会被 `xcodegen generate` **写入并覆盖**
+# 对应路径的 Info.plist。所以不要手改 App/Info.plist 或 BroadcastExtension/Info.plist，
+# 改这里再重新 generate。
+# （曾踩坑：只写了 info.path 没写 properties，xcodegen 用最小模板覆盖了手写 plist，
+#   导致 NSExtension / NSLocalNetworkUsageDescription / UIBackgroundModes 全部丢失，
+#   广播扩展变成无效扩展，重签后也无法正常使用。）
 name: ZEEHOCast
 options:
   bundleIdPrefix: com.zeeho
@@ -12,7 +16,6 @@ settings:
     SWIFT_VERSION: "5.0"
     IPHONEOS_DEPLOYMENT_TARGET: "14.0"
     ENABLE_BITCODE: NO
-    CODE_SIGN_REQUIRED: NO
     CODE_SIGNING_REQUIRED: NO
     CODE_SIGNING_ALLOWED: NO
     CODE_SIGN_IDENTITY: ""
@@ -29,14 +32,16 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDevelopmentRegion: zh_CN
-        CFBundleDisplayName: 鏋佹牳鎶曞睆
+        CFBundleDisplayName: 极核投屏
         CFBundleShortVersionString: "1.0.1"
         CFBundleVersion: "2"
         LSRequiresIPhoneOS: true
-        NSCameraUsageDescription: 鐢ㄤ簬鎵弿浠〃杩炴帴浜岀淮鐮?        NSLocalNetworkUsageDescription: 鐢ㄤ簬鍙戠幇骞惰繛鎺ユ瀬鏍镐华琛?WiFi 杩涜鎶曞睆
+        NSCameraUsageDescription: 用于扫描仪表连接二维码
+        NSLocalNetworkUsageDescription: 用于发现并连接极核仪表 WiFi 进行投屏
         NSBonjourServices:
           - _EasyConn._tcp
-        # 鐔勫睆鎶曞睆闈犲悗鍙板父椹伙紝缂鸿繖涓敭鐔勫睆鍚庝細琚郴缁熸寕璧?        UIBackgroundModes:
+        # 熄屏投屏靠后台常驻，缺这个键熄屏后会被系统挂起
+        UIBackgroundModes:
           - audio
         UILaunchScreen: {}
         UIRequiredDeviceCapabilities:
@@ -45,7 +50,7 @@ targets:
           - UIInterfaceOrientationPortrait
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
-        # 鍗忚鏃ュ織瀵煎嚭鍒?Documents锛屾柟渚跨敤銆屾枃浠躲€岮pp 鍙栧嚭
+        # 协议日志导出到 Documents，方便用「文件」App 取出
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
     settings:
@@ -67,12 +72,13 @@ targets:
       path: BroadcastExtension/Info.plist
       properties:
         CFBundleDevelopmentRegion: zh_CN
-        CFBundleDisplayName: 鏋佹牳鎶曞睆骞挎挱
+        CFBundleDisplayName: 极核投屏广播
         CFBundlePackageType: "XPC!"
         CFBundleShortVersionString: "1.0.1"
         CFBundleVersion: "2"
-        # ReplayKit 骞挎挱鎵╁睍蹇呴』澹版槑 NSExtension锛屽惁鍒欑郴缁熷箍鎾€夋嫨鍣ㄩ噷鐪嬩笉鍒帮紝
-        # 閲嶇瀹夎涔熶細琚垽涓烘棤鏁堟墿灞曘€?        NSExtension:
+        # ReplayKit 广播扩展必须声明 NSExtension，否则系统广播选择器里看不到，
+        # 重签安装也会被判为无效扩展。
+        NSExtension:
           NSExtensionPointIdentifier: com.apple.broadcast-services-upload
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).SampleHandler
           RPBroadcastProcessMode: RPBroadcastProcessModeSampleBuffer
