@@ -23,11 +23,16 @@ TCP 连接仪表（默认 `192.168.49.1:1807`）→ EC_Ping 握手 → HELLO →
 ## 免责声明
 
 本工具仅供个人维护与调试用途，请勿用于非法用途。使用本工具产生的任何后果由使用者自行承担。
+本项目与极核（ZEEHO）、春风动力、武汉卡比特/亿连无任何关联，完整免责声明见[根目录 README](../README.md#免责声明)。
 
 ## 构建
 
+需要 JDK 17 与 Android SDK 34。**请使用仓库内的 Gradle wrapper**（固定 Gradle 8.2），
+不要用系统自带的 `gradle`——AGP 8.1.0 在 Gradle 9 上会因 API 移除直接构建失败。
+
 ```bash
-gradle assembleDebug
+./gradlew assembleDebug assembleRelease
 ```
 
-或使用仓库内 `.github/workflows/build.yml` 由 GitHub Actions 自动构建 APK（产物在 Actions Artifacts 下载）。
+或使用仓库内 `.github/workflows/build.yml` 由 GitHub Actions 自动构建 APK（产物在 Actions Artifacts 下载，
+打 tag 后可发布到 Releases）。
